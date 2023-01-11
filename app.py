@@ -3,7 +3,7 @@ import openai
 from flask import Flask, redirect, render_template, request, url_for
 
 app = Flask(__name__)
-openai.api_key = "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"
+openai.api_key = ""
 
 
 is_loading = False
