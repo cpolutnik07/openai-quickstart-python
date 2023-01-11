@@ -1,21 +1,69 @@
 <!DOCTYPE html>
+
 <head>
-  <title>OpenAI Quickstart</title>
-  <link
-    rel="shortcut icon"
-    href="{{ url_for('static', filename='dog.png') }}"
-  />
+  <title>OpenAI</title>
+  <link rel="shortcut icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💩</text></svg>"
+    type="image/svg+xml">
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.2/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='highlight.css') }}" />
+  <style>
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      opacity: 0.8;
+      filter: alpha(opacity=80);
+      z-index: 100;
+    }
+  </style>
 </head>
 
 <body>
-  <img src="{{ url_for('static', filename='dog.png') }}" class="icon" />
-  <h3>Name my pet</h3>
-  <form action="/" method="post">
-    <input type="text" name="animal" placeholder="Enter an animal" required />
-    <input type="submit" value="Generate names" />
+  <div id="loading" name="loading" class="overlay" style="display: none">
+    <img id="loading-image" src="{{ url_for('static', filename='ajax-loader.gif') }}" alt="Loading..." />
+  </div>
+
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="icon">
+    <text y=".9em" font-size="90">💩</text>
+  </svg>
+  <h3>Fix my shit</h3>
+  <div name="topdiv"></div>
+  <form id="form" action="/" method="post">
+    <textarea name="input" placeholder="Enter a block of code or something to work with (Optional)" rows="10" cols="50">{{input_text}}</textarea>
+    <textarea rows="1" name="instruction" placeholder="Give GPT some instructions (Required)" required>{{instruction_text}}</textarea>
+    <input type="submit" value="Generate" onclick="document.getElementsByName('loading')[0].style.display='flex';" />
   </form>
   {% if result %}
-  <div class="result">{{ result }}</div>
+  <div class="code-box">
+    <div class="code-box-header">
+      <span class="code-box-title"></span>
+      <button class="code-box-button" onclick="copyCode()">Copy to clipboard</button>
+    </div>
+    <pre id="code-content"><code class="python">{{ result|e }}</code></pre>
+  </div>
+  </div>
   {% endif %}
+
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script>    
+    function copyCode() {
+      var codeContent = document.getElementById("code-content");
+      var button = document.getElementsByClassName("code-box-button")[0];
+      var range = document.createRange();
+      range.selectNode(codeContent);
+      window.getSelection().addRange(range);
+      document.execCommand("copy");
+      button.textContent = "Copied!";
+      setTimeout(function () {
+        button.textContent = "Copy to clipboard";
+      }, 2000);
+    }
+
+  </script>
 </body>

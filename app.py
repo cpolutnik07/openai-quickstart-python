@@ -1,35 +1,37 @@
 import os
-
 import openai
 from flask import Flask, redirect, render_template, request, url_for
 
 app = Flask(__name__)
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = "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"
 
+
+is_loading = False
 
 @app.route("/", methods=("GET", "POST"))
 def index():
+    global is_loading
+    input_text=''
+    instruction_text=''
     if request.method == "POST":
-        animal = request.form["animal"]
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=generate_prompt(animal),
-            temperature=0.6,
-        )
-        return redirect(url_for("index", result=response.choices[0].text))
-
+        is_loading = True # Show loading
+        input_text = request.form["input"]
+        instruction_text = request.form["instruction"]
+        try:
+            response = openai.Edit.create(
+                model="text-davinci-edit-001",
+                input=input_text,
+                instruction = instruction_text,
+                temperature=0.6,
+            )
+            result = response.choices[0].text
+        except openai.exceptions.OpenAiError as e:
+            result = str(e)        
+        is_loading = False # Hide loading
+        return redirect(url_for("index", result=result, input_text=input_text, instruction_text=instruction_text))    
     result = request.args.get("result")
-    return render_template("index.html", result=result)
+    input_text = request.args.get("input_text")
+    instruction_text = request.args.get("instruction_text")
+    return render_template("index.html", result=result, is_loading=is_loading)
 
 
-def generate_prompt(animal):
-    return """Suggest three names for an animal that is a superhero.
-
-Animal: Cat
-Names: Captain Sharpclaw, Agent Fluffball, The Incredible Feline
-Animal: Dog
-Names: Ruff the Protector, Wonder Canine, Sir Barks-a-Lot
-Animal: {}
-Names:""".format(
-        animal.capitalize()
-    )
